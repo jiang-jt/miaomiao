@@ -10,7 +10,7 @@
             <h2>{{ item.title }}</h2>
             <p>
               观众评
-              <span class="grade">{{ item.collect_count }}</span>
+              <span class="grade">{{ item.rating.average }}</span>
             </p>
             <p>
               主演：
