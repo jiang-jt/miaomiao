@@ -1,0 +1,6 @@
+@mixin router-link-active {
+    .router-link-active {
+        color: #ef4238;
+        border-bottom: 2px solid #ef4238;
+      }
+}
