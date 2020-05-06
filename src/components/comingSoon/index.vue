@@ -44,7 +44,7 @@ export default {
 
   },
   mounted(){
-    this.$http.get('/coming_soon')
+    this.$http.get('/movie/coming_soon')
     .then(res=>{
       this.dataList =res.data
       console.log(res.data)

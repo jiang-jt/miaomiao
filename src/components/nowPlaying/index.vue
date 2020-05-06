@@ -13,6 +13,13 @@
               <span class="grade">{{ item.rating.average }}</span>
             </p>
             <p>
+              类型：
+              <span
+                v-for="(genre,idx) in item.genres"
+                :key="idx"
+              >{{ idx==item.genres.length-1?genre:genre+',' }}</span>
+            </p>
+            <p>
               主演：
               <span
                 v-for="(actor,idx) in item.casts"
@@ -40,7 +47,7 @@ export default {
   },
   created() {},
   mounted() {
-    this.$http.get("/in_theaters").then(res => {
+    this.$http.get("/movie/in_theaters").then(res => {
       this.dataList = res.data;
       console.log(this.dataList);
     });

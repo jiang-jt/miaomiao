@@ -2,20 +2,17 @@
   <div class="cinema_body">
     <div class="wrapper">
       <ul>
-        <li>
+        <li v-for="item in cinemaListTag" :key="item.id">
           <div class="title">
-            <span>UA电影城（上海梅龙镇广场店）</span>
-            <span class="q">元起</span>
+            <span>{{ item.nm }}</span>
+            <span class="q">{{ 23 }}元起</span>
           </div>
           <div class="address">
-            <span>静安区南京西路1038号梅龙镇广场10楼（近江宁路）</span>
-            <span>863.4km</span>
+            <span>{{ item.addr }}</span>
+            <span>{{ item.distance }}</span>
           </div>
           <div class="card">
-            <div class="bl">改签</div>
-            <div class="bl">退</div>
-            <div class="or">折扣卡</div>
-            <div class="or">小吃</div>
+            <div v-for="(item,key) in item.tag" :key="key" :class='key | formatClass'>{{ key | formatCard}}</div>
           </div>
         </li>
       </ul>
@@ -24,7 +21,70 @@
 </template>
 
 <script>
-export default {};
+export default {
+  name: "cList",
+  data() {
+    return {
+      cinemaList: []
+    };
+  },
+  computed: {
+    cinemaListTag() {
+      let res = this.cinemaList.filter(item => {
+        for (const key in item.tag) {
+          if (item.tag.hasOwnProperty(key)) {
+            const val = item.tag[key];
+            if (val !== 1) {
+              delete item.tag[key];
+            }
+          }
+        }
+        console.log(item);
+        return item;
+      });
+      console.log(res);
+      return res;
+    }
+  },
+  mounted() {
+    this.$http.get("/api/cinemaList?cityId=18").then(res => {
+      let msg = res.data.msg;
+      if (msg === "ok") {
+        this.cinemaList = res.data.data.cinemas;
+      }
+    });
+  },
+  filters: {
+    formatCard(key) {
+      var card = [
+        { key: "allowRefund", value: "退" },
+        { key: "buyout", value: "一口价" },
+        { key: "endorse", value: "改签" },
+        { key: "sell", value: "折扣" },
+        { key: "snack", value: "小吃" }
+      ];
+      for (let i = 0; i < card.length; i++) {
+        if (card[i].key === key) {
+          return card[i].value;
+        }
+      }
+    },
+    formatClass(key){
+        var card = [
+        { key: "allowRefund", value: "bl" },
+        { key: "buyout", value: "bl" },
+        { key: "endorse", value: "bl" },
+        { key: "sell", value: "ol" },
+        { key: "snack", value: "ol" }
+      ];
+      for (let i = 0; i < card.length; i++) {
+        if (card[i].key === key) {
+          return card[i].value;
+        }
+      }
+    }
+  }
+};
 </script>
 
 <style lang="scss" scoped>
