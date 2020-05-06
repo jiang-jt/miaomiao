@@ -4,31 +4,25 @@
       <div class="city_hot">
         <h2>热门城市</h2>
         <ul>
-          <li>北京</li>
-          <li>上海</li>
-          <li>天津</li>
-          <li>杭州</li>
-          <li>南京</li>
-          <li>成都</li>
-          <li>广州</li>
+          <li v-for="item in hotList" :key="item.id">{{ item.nm }}</li>
         </ul>
       </div>
-      <div class="city_sort">
-        <h2>A</h2>
-        <ul>
-          <li>鞍山</li>
-          <li>鞍山</li>
-          <li>鞍山</li>
-          <li>鞍山</li>
-          <li>鞍山</li>
-          <li>鞍山</li>
-          <li>鞍山</li>
-        </ul>
+      <div class="city_sort" ref="city_sort">
+        <div v-for="(item,index) in citiesList" :key="index">
+          <h2>{{ item.index }}</h2>
+          <ul>
+            <li v-for="city in item.list" :key="city.id">{{ city.nm }}</li>
+          </ul>
+        </div>
       </div>
     </div>
     <div class="city_index">
       <ul>
-        <li v-for="idx in abcArr" :key="idx">{{ String.fromCharCode((64 + idx)) }}</li>
+        <li
+          v-for="(item,index) in citiesList"
+          :key="item.index"
+          @touchstart="handleToIndex(index)"
+        >{{ item.index }}</li>
       </ul>
     </div>
   </div>
@@ -39,37 +33,83 @@ export default {
   name: "city",
   data() {
     return {
-      abcArr: [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20,
-        21,
-        22,
-        23,
-        24,
-        25,
-        26
-      ]
+      i: 26,
+      citiesList: [],
+      hotList: []
     };
   },
-  methods: {}
+  methods: {},
+  mounted() {
+    this.$http.get("/api/cityList").then(res => {
+      if (res.data.msg == "ok") {
+        let cities = res.data.data.cities;
+        // [{index:'A',list[nm:'阿狸',id:1,....]}]
+        var { citiesList, hotList } = this.formatCitiesList(cities);
+        this.citiesList = citiesList;
+        this.hotList = hotList;
+      }
+    });
+  },
+  methods: {
+    formatCitiesList(cities) {
+      var citiesList = [];
+      var hotList = [];
+
+      for (let i = 0; i < cities.length; i++) {
+        if (cities[i].isHot === 1) {
+          hotList.push(cities[i]);
+        }
+      }
+
+      for (let i = 0; i < cities.length; i++) {
+        // 获取到拼音首字母
+        let firstLetter = cities[i].py.substring(0, 1).toUpperCase();
+        if (isExist(firstLetter)) {
+          // 如果不存在就添加
+          citiesList.push({
+            index: firstLetter,
+            list: [{ nm: cities[i].nm, id: cities[i].id }]
+          });
+        } else {
+          for (let j = 0; j < citiesList.length; j++) {
+            if (citiesList[j].index === firstLetter) {
+              citiesList[j].list.push({
+                nm: cities[i].nm,
+                id: cities[i].id
+              });
+            }
+          }
+        }
+      }
+      function isExist(firstLetter) {
+        for (let i = 0; i < citiesList.length; i++) {
+          if (citiesList[i].index === firstLetter) {
+            return false;
+          }
+        }
+        return true;
+      }
+      citiesList.sort((n1, n2) => {
+        if (n1.index > n2.index) {
+          return 1;
+        } else if (n1.index < n2.index) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
+      return {
+        citiesList,
+        hotList
+      };
+    },
+    handleToIndex(index) {
+      // 获取所有h2标签
+      var h2 = this.$refs.city_sort.getElementsByTagName("h2");
+      // 滚动条距离 = h2.offsetTop :可以获得 HTML 元素距离上方或外层元素的位置
+      this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop;
+    }
+  }
 };
 </script>
 
@@ -84,6 +124,7 @@ export default {
   .city_list {
     flex: 1;
     background: #fff5f0;
+    overflow: auto;
     .city_hot {
       margin-top: 20px;
       h2 {
@@ -125,7 +166,7 @@ export default {
       ul {
         margin-top: 10px;
         margin-left: 10px;
-        li{
+        li {
           line-height: 30px;
         }
       }
@@ -148,7 +189,7 @@ export default {
     ul {
       li {
         font-size: 16px;
-        line-height: 18px;
+        line-height: 20px;
       }
     }
   }

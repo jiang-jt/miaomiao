@@ -3,27 +3,24 @@
     <div class="search_input">
       <div class="search_input_wrapper">
         <i class="iconfont icon-sousuo"></i>
-        <input type="text" @input="search_movie"/>
+        <input type="text" v-model="message" />
       </div>
     </div>
     <div class="search_result">
       <h3>电影/电视剧/综艺</h3>
       <ul>
-        <movieList>
+        <movieList v-for="(item,index) in moviesList" :key="index">
           <template #img>
-            <img
-              src="https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2578705064.webp"
-              alt
-            />
+            <img :src="item.img | setWH('64.90')" :alt="item.nm" />
           </template>
           <template #info>
-            <h2>绝命始终</h2>
-            <p>How it's made</p>
-            <p>电视剧,纪录片</p>
-            <p>2018-4-2</p>
+            <h2>{{ item.nm }}</h2>
+            <p>{{ item.enm }}</p>
+            <p>{{ item.cat }}</p>
+            <p>{{ item.frt }}</p>
           </template>
           <template #user_define>
-            <div class="grade">7.8</div>
+            <div class="grade">{{ item.sc }}</div>
           </template>
         </movieList>
       </ul>
@@ -35,12 +32,47 @@
 import movieList from "@/components/movieList";
 export default {
   name: "search",
+  data() {
+    return {
+      message: "",
+      moviesList: []
+    };
+  },
+  watch: {
+    message(newVal) {
+      // 函数防抖
+      this.cancelRequest();
+      this.$http
+        .get("/api/searchList?cityId=10&kw=" + newVal, {
+          cancelToken: new this.$http.CancelToken(c => {
+            this.source = c;
+          })
+        })
+        .then(res => {
+          let msg = res.data.msg;
+          let dataList = res.data.data.movies;
+          if (msg && dataList) {
+            this.moviesList = dataList.list;
+          }
+        })
+        .catch(err => {
+          if (this.$http.isCancel(err)) {
+            //console.log("Rquest canceled", err.message); //请求如果被取消，这里是返回取消的message
+          } else {
+            //handle error
+            console.log(err);
+          }
+        });
+    }
+  },
   components: {
     movieList
   },
-  methods:{
-    search_movie(){
-      console.log("change触发")
+  methods: {
+    cancelRequest() {
+      if (typeof this.source === "function") {
+        this.source("终止请求");
+      }
     }
   }
 };
