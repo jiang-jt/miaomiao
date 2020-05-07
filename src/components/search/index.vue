@@ -42,8 +42,9 @@ export default {
     message(newVal) {
       // 函数防抖
       this.cancelRequest();
+      var cityId = this.$store.state.city.id;
       this.$http
-        .get("/api/searchList?cityId=10&kw=" + newVal, {
+        .get("/api/searchList?cityId="+cityId+"&kw=" + newVal, {
           cancelToken: new this.$http.CancelToken(c => {
             this.source = c;
           })

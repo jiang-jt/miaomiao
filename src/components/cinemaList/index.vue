@@ -1,7 +1,9 @@
 <template>
   <div class="cinema_body">
-    <div class="wrapper">
+    <glo-loading v-if="gloLoading"></glo-loading>
+    <scroller v-else :handleToScroll="handleToScroll" :handleToTouchEnd="handleToTouchEnd">
       <ul>
+        <li class="loadingClass" v-loading="loading" element-loading-text="拼命加载中"></li>
         <li v-for="item in cinemaListTag" :key="item.id">
           <div class="title">
             <span>{{ item.nm }}</span>
@@ -12,11 +14,15 @@
             <span>{{ item.distance }}</span>
           </div>
           <div class="card">
-            <div v-for="(item,key) in item.tag" :key="key" :class='key | formatClass'>{{ key | formatCard}}</div>
+            <div
+              v-for="(item,key) in item.tag"
+              :key="key"
+              :class="key | formatClass"
+            >{{ key | formatCard}}</div>
           </div>
         </li>
       </ul>
-    </div>
+    </scroller>
   </div>
 </template>
 
@@ -25,7 +31,10 @@ export default {
   name: "cList",
   data() {
     return {
-      cinemaList: []
+      cinemaList: [],
+      loading: false,
+      gloLoading: true,
+      prevCityId: -1
     };
   },
   computed: {
@@ -39,18 +48,23 @@ export default {
             }
           }
         }
-        console.log(item);
         return item;
       });
-      console.log(res);
       return res;
     }
   },
-  mounted() {
-    this.$http.get("/api/cinemaList?cityId=18").then(res => {
+  activated() {
+      var cityId = this.$store.state.city.id;
+      if (this.prevCityId === cityId) {
+          return;
+      }
+      this.gloLoading = true;
+    this.$http.get("/api/cinemaList?cityId="+cityId).then(res => {
       let msg = res.data.msg;
       if (msg === "ok") {
         this.cinemaList = res.data.data.cinemas;
+        this.gloLoading = false;
+        this.prevCityId = cityId;
       }
     });
   },
@@ -69,8 +83,8 @@ export default {
         }
       }
     },
-    formatClass(key){
-        var card = [
+    formatClass(key) {
+      var card = [
         { key: "allowRefund", value: "bl" },
         { key: "buyout", value: "bl" },
         { key: "endorse", value: "bl" },
@@ -83,6 +97,24 @@ export default {
         }
       }
     }
+  },
+  methods: {
+    handleToScroll(pos) {
+      if (pos.y > 30) {
+        this.loading = true;
+      }
+    },
+    handleToTouchEnd(pos) {
+      if (pos.y > 30) {
+        this.$http.get("/api/cinemaList?cityId="+this.prevCityId).then(res => {
+          let msg = res.data.msg;
+          if (msg === "ok") {
+            this.cinemaList = res.data.data.cinemas;
+            this.loading = false;
+          }
+        });
+      }
+    }
   }
 };
 </script>
@@ -92,53 +124,55 @@ export default {
   flex: 1;
   overflow: auto;
   -webkit-box-flex: 1;
-  .wrapper {
-    height: 100%;
-    ul {
-      padding: 20px;
-      li {
-        border-bottom: 1px solid #e6e6e6;
-        margin-bottom: 20px;
+  ul {
+    padding: 20px;
+    .loadingClass {
+      border: 0;
+      padding: 0;
+      margin: 0;
+    }
+    li {
+      border-bottom: 1px solid #e6e6e6;
+      margin-bottom: 20px;
+      div {
+        margin-bottom: 10px;
+      }
+      .title {
+        span:first-child {
+          font-weight: 400;
+        }
+        .q {
+          color: #f03d37;
+          font-size: 11px;
+        }
+      }
+      .address {
+        font-size: 13px;
+        color: #666;
+        span:last-child {
+          float: right;
+        }
+      }
+      .card {
+        display: flex;
         div {
-          margin-bottom: 10px;
-        }
-        .title {
-          span:first-child {
-            font-weight: 400;
-          }
-          .q {
-            color: #f03d37;
-            font-size: 11px;
-          }
-        }
-        .address {
+          padding: 0 3px;
+          height: 15px;
+          line-height: 15px;
+          border-radius: 2px;
+          color: #f90;
+          border: 1px solid #f90;
           font-size: 13px;
-          color: #666;
-          span:last-child {
-            float: right;
-          }
+          margin-right: 5px;
+          color: black;
         }
-        .card {
-          display: flex;
-          div {
-            padding: 0 3px;
-            height: 15px;
-            line-height: 15px;
-            border-radius: 2px;
-            color: #f90;
-            border: 1px solid #f90;
-            font-size: 13px;
-            margin-right: 5px;
-            color: black;
-          }
-          .bl {
-            border: 1px solid #589daf;
-            color: #589daf;
-          }
-          .or {
-            border: 1px solid #f90;
-            color: #f90;
-          }
+        .bl {
+          border: 1px solid #589daf;
+          color: #589daf;
+        }
+        .or {
+          border: 1px solid #f90;
+          color: #f90;
         }
       }
     }

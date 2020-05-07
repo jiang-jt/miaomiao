@@ -19,7 +19,7 @@ export default {
         },
         {
             path:'/movie',
-            redirect: 'nowPlaying'
+            redirect: '/movie/nowPlaying'
         }
     ]
 }

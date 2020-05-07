@@ -1,20 +1,33 @@
 <template>
   <div class="city_body">
     <div class="city_list">
-      <div class="city_hot">
-        <h2>热门城市</h2>
-        <ul>
-          <li v-for="item in hotList" :key="item.id">{{ item.nm }}</li>
-        </ul>
-      </div>
-      <div class="city_sort" ref="city_sort">
-        <div v-for="(item,index) in citiesList" :key="index">
-          <h2>{{ item.index }}</h2>
-          <ul>
-            <li v-for="city in item.list" :key="city.id">{{ city.nm }}</li>
-          </ul>
+      <glo-loading v-if="gloLoading"></glo-loading>
+      <scroller v-else ref="city_list">
+        <div>
+          <div class="city_hot">
+            <h2>热门城市</h2>
+            <ul>
+              <li
+                v-for="item in hotList"
+                :key="item.id"
+                @tap="handleToTap(item.nm,item.id)"
+              >{{ item.nm }}</li>
+            </ul>
+          </div>
+          <div class="city_sort" ref="city_sort">
+            <div v-for="(item,index) in citiesList" :key="index">
+              <h2>{{ item.index }}</h2>
+              <ul>
+                <li
+                  v-for="city in item.list"
+                  :key="city.id"
+                  @tap="handleToTap(city.nm,city.id)"
+                >{{ city.nm }}</li>
+              </ul>
+            </div>
+          </div>
         </div>
-      </div>
+      </scroller>
     </div>
     <div class="city_index">
       <ul>
@@ -35,22 +48,35 @@ export default {
     return {
       i: 26,
       citiesList: [],
-      hotList: []
+      hotList: [],
+      gloLoading: true
     };
   },
   methods: {},
   mounted() {
-    this.$http.get("/api/cityList").then(res => {
-      if (res.data.msg == "ok") {
-        let cities = res.data.data.cities;
-        // [{index:'A',list[nm:'阿狸',id:1,....]}]
-        var { citiesList, hotList } = this.formatCitiesList(cities);
-        this.citiesList = citiesList;
-        this.hotList = hotList;
-      }
-    });
+    var cityList = window.localStorage.getItem("citiesList");
+    var hotList = window.localStorage.getItem("hotList");
+    if (cityList && hotList) {
+      this.citiesList = JSON.parse(cityList);
+      this.hotList = JSON.parse(hotList);
+      this.gloLoading = false;
+    } else {
+      this.$http.get("/api/cityList").then(res => {
+        if (res.data.msg == "ok") {
+          let cities = res.data.data.cities;
+          // [{index:'A',list[nm:'阿狸',id:1,....]}]
+          let { citiesList, hotList } = this.formatCitiesList(cities);
+          this.citiesList = citiesList;
+          this.hotList = hotList;
+          this.gloLoading = false;
+          window.localStorage.setItem("citiesList", JSON.stringify(citiesList));
+          window.localStorage.setItem("hotList", JSON.stringify(hotList));
+        }
+      });
+    }
   },
   methods: {
+    // 格式化城市数据格式
     formatCitiesList(cities) {
       var citiesList = [];
       var hotList = [];
@@ -107,7 +133,16 @@ export default {
       // 获取所有h2标签
       var h2 = this.$refs.city_sort.getElementsByTagName("h2");
       // 滚动条距离 = h2.offsetTop :可以获得 HTML 元素距离上方或外层元素的位置
-      this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop;
+      // this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop;
+      this.$refs.city_list.toScrollTop(-h2[index].offsetTop);
+    },
+    handleToTap(nm, id) {
+      // 选择城市后，更改state的值
+      this.$store.commit("city/CITY_INFO", { nm: nm, id: id });
+      // 记住选择的城市
+      window.localStorage.setItem("nowNm", nm);
+      window.localStorage.setItem("nowId", id);
+      this.$router.push("/movie/nowPlaying"); // 编程式导航
     }
   }
 };
@@ -156,6 +191,9 @@ export default {
     }
     .city_sort {
       margin-top: 20px;
+      div {
+        margin-top: 20px;
+      }
       h2 {
         font-size: 14px;
         line-height: 30px;

@@ -4,7 +4,7 @@
     <div id="content">
       <div class="movie_menu">
         <router-link tag="div" to="/movie/city" class="city_name">
-          <span>赣州</span>
+          <span>{{ $store.state.city.nm }}</span>
           <i class="iconfont icon-xiajiantou"></i>
         </router-link>
         <div class="hot_swtich">
@@ -26,11 +26,38 @@
 <script>
 import Header from "@/components/header";
 import navBar from "@/components/footer";
+import { messageBox } from "@/components/JS/index.js";
+
 export default {
   name: "movie",
   components: {
     Header,
     navBar
+  },
+  mounted() {
+    setTimeout(() => {
+      this.$http.get("/api/getLocation").then(res => {
+        if (res.data.msg === "ok") {
+          var nm = res.data.data.nm;
+          var id = res.data.data.id;
+          if (this.$store.state.city.id == id) {
+            return;
+          }
+          messageBox({
+            title: "定位",
+            content: nm,
+            cancel: "取消",
+            ok: "切换定位",
+            handleOk() {
+              // 更改本地存储
+              window.localStorage.setItem("nowNm", nm);
+              window.localStorage.setItem("nowId", id);
+              window.location.reload();
+            }
+          });
+        }
+      });
+    }, 3000);
   }
 };
 </script>
