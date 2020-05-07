@@ -1,32 +1,34 @@
 <template>
-    <div class="movie_body">
-      <div id="wrapper">
-        <ul>
-          <movieList v-for="(item,index) in dataList.subjects" :key="index">
-            <template #img>
-              <img
-                :src="item.images.small"
-                :alt="item.title"
-              />
-            </template>
-            <template #info>
-              <h2>{{ item.title }}</h2>
-              <p>
-                <span>{{ item.collect_count*35 }}</span>人想看
-              </p>
-              <p>
-                主演：
-                <span v-for="(actor,idx) in item.casts" :key="idx">{{ idx==item.casts.length-1?actor.name:actor.name+',' }}</span>
-              </p>
-              <p>{{ item.pubdates[0] }}</p>
-            </template>
-            <template #user_define>
-              <div class="btn_pre">预售</div>
-            </template>
-          </movieList>
-        </ul>
-      </div>
-    </div>
+  <div class="movie_body">
+    <glo-loading v-if="gloLoading"></glo-loading>
+    <scroller v-else :handleToScroll="handleToScroll" :handleToTouchEnd="handleToTouchEnd">
+      <ul>
+        <li v-loading="loading" element-loading-text="拼命加载中"></li>
+        <movieList v-for="(item,index) in dataList.subjects" :key="index">
+          <template #img>
+            <img :src="item.images.small" :alt="item.title" />
+          </template>
+          <template #info>
+            <h2>{{ item.title }}</h2>
+            <p>
+              <span>{{ item.collect_count*35 }}</span>人想看
+            </p>
+            <p>
+              主演：
+              <span
+                v-for="(actor,idx) in item.casts"
+                :key="idx"
+              >{{ idx==item.casts.length-1?actor.name:actor.name+',' }}</span>
+            </p>
+            <p>{{ item.pubdates[0] }}</p>
+          </template>
+          <template #user_define>
+            <div class="btn_pre">预售</div>
+          </template>
+        </movieList>
+      </ul>
+    </scroller>
+  </div>
 </template>
 <script>
 import movieList from "@/components/movieList";
@@ -34,21 +36,35 @@ export default {
   name: "comingSoon",
   data() {
     return {
-      dataList:''
+      dataList: "",
+      loading: false,
+      gloLoading: true
     };
   },
   components: {
     movieList
   },
-  created(){
-
+  created() {},
+  mounted() {
+    this.$http.get("/movieApi/coming_soon").then(res => {
+      this.dataList = res.data;
+      this.gloLoading = false;
+    });
   },
-  mounted(){
-    this.$http.get('/movie/coming_soon')
-    .then(res=>{
-      this.dataList =res.data
-      console.log(res.data)
-    })
+  methods: {
+    handleToScroll(pos) {
+      if (pos.y > 30) {
+        this.loading = true;
+      }
+    },
+    handleToTouchEnd(pos) {
+      if (pos.y > 30) {
+        this.$http.get("/movieApi/coming_soon").then(res => {
+          this.dataList = res.data;
+          this.loading = false;
+        });
+      }
+    }
   }
 };
 </script>
@@ -58,13 +74,11 @@ export default {
   flex: 1;
   overflow: auto;
 }
-#wrapper {
-  height: 100%;
-  ul {
-    margin: 0 12px;
-    overflow: hidden;
-  }
+ul {
+  margin: 0 12px;
+  overflow: hidden;
 }
+
 .btn_pre {
   width: 47px;
   height: 27px;
