@@ -20,6 +20,7 @@
       </keep-alive>
     </div>
     <navBar></navBar>
+    <router-view name="detail"></router-view>
   </div>
 </template>
 

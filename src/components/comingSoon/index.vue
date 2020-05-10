@@ -3,13 +3,13 @@
     <glo-loading v-if="gloLoading"></glo-loading>
     <scroller v-else :handleToScroll="handleToScroll" :handleToTouchEnd="handleToTouchEnd">
       <ul>
-        <li v-loading="loading" element-loading-text="拼命加载中"></li>
+        <li ref="loadWrapper" v-loading="loading" element-loading-text="拼命加载中"></li>
         <movieList v-for="(item,index) in dataList.subjects" :key="index">
           <template #img>
-            <img :src="item.images.small" :alt="item.title" />
+            <img @tap="handleToDetail(item.id)" :src="item.images.small" :alt="item.title" />
           </template>
           <template #info>
-            <h2>{{ item.title }}</h2>
+            <h2 @tap="handleToDetail(item.id)">{{ item.title }}</h2>
             <p>
               <span>{{ item.collect_count*35 }}</span>人想看
             </p>
@@ -52,9 +52,13 @@ export default {
     });
   },
   methods: {
+     handleToDetail(id) {
+      this.$router.push("/movie/detail/2/" + id);
+    },
     handleToScroll(pos) {
       if (pos.y > 30) {
         this.loading = true;
+        this.$refs.loadWrapper.style.height = '71.2px';
       }
     },
     handleToTouchEnd(pos) {
@@ -62,6 +66,7 @@ export default {
         this.$http.get("/movieApi/coming_soon").then(res => {
           this.dataList = res.data;
           this.loading = false;
+          this.$refs.loadWrapper.style.height = '0px';
         });
       }
     }

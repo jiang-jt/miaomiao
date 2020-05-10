@@ -3,7 +3,13 @@
     <glo-loading v-if="gloLoading"></glo-loading>
     <scroller v-else :handleToScroll="handleToScroll" :handleToTouchEnd="handleToTouchEnd">
       <ul>
-        <li class="loadingClass" v-loading="loading" element-loading-text="拼命加载中"></li>
+        <li
+          style="margin-top:-45px;margin-bottom:45px;"
+          class="loadingClass"
+          ref="loadWrapper"
+          v-loading="loading"
+          element-loading-text="拼命加载中"
+        ></li>
         <li v-for="item in cinemaListTag" :key="item.id">
           <div class="title">
             <span>{{ item.nm }}</span>
@@ -54,12 +60,12 @@ export default {
     }
   },
   activated() {
-      var cityId = this.$store.state.city.id;
-      if (this.prevCityId === cityId) {
-          return;
-      }
-      this.gloLoading = true;
-    this.$http.get("/api/cinemaList?cityId="+cityId).then(res => {
+    var cityId = this.$store.state.city.id;
+    if (this.prevCityId === cityId) {
+      return;
+    }
+    this.gloLoading = true;
+    this.$http.get("/api/cinemaList?cityId=" + cityId).then(res => {
       let msg = res.data.msg;
       if (msg === "ok") {
         this.cinemaList = res.data.data.cinemas;
@@ -102,17 +108,21 @@ export default {
     handleToScroll(pos) {
       if (pos.y > 30) {
         this.loading = true;
+        this.$refs.loadWrapper.style.height = "100px";
       }
     },
     handleToTouchEnd(pos) {
       if (pos.y > 30) {
-        this.$http.get("/api/cinemaList?cityId="+this.prevCityId).then(res => {
-          let msg = res.data.msg;
-          if (msg === "ok") {
-            this.cinemaList = res.data.data.cinemas;
-            this.loading = false;
-          }
-        });
+        this.$http
+          .get("/api/cinemaList?cityId=" + this.prevCityId)
+          .then(res => {
+            let msg = res.data.msg;
+            if (msg === "ok") {
+              this.cinemaList = res.data.data.cinemas;
+              this.loading = false;
+              this.$refs.loadWrapper.style.height = "0px";
+            }
+          });
       }
     }
   }
