@@ -102,20 +102,6 @@
                   <div class="author_info">
                     <h2>{{ item.author.name }}</h2>
                     <el-rate v-model="item.rating.value" :disabled="true"></el-rate>
-                    <!-- <div>
-                      <ul>
-                        <li
-                          :style="lightStar"
-                          v-for="count in item.rating.value"
-                          :key="'light'+count"
-                        ></li>
-                        <li
-                          :style="grayStar"
-                          v-for="count in 5-item.rating.value"
-                          :key="'gray'+count"
-                        ></li>
-                      </ul>
-                    </div>-->
                   </div>
                 </div>
                 <div class="comment_content">
