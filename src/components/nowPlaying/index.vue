@@ -3,13 +3,13 @@
     <glo-loading v-if="gloLoading"></glo-loading>
     <scroller v-else :handleToScroll="handleToScroll" :handleToTouchEnd="handleToTouchEnd">
       <ul>
-        <li v-loading="loading" element-loading-text="拼命加载中"></li>
+        <li ref="loadWrapper" v-loading="loading" element-loading-text="拼命加载中"></li>
         <movieList v-for="(item,index) in dataList.subjects" :key="index">
           <template #img>
-            <img :src="item.images.small" :alt="item.title" />
+            <img @tap="handleToDetail(item.id)" :src="item.images.small" :alt="item.title" />
           </template>
           <template #info>
-            <h2>{{ item.title }}</h2>
+            <h2 @tap="handleToDetail(item.id)">{{ item.title }}</h2>
             <p>
               观众评
               <span class="grade">{{ item.rating.average }}</span>
@@ -64,28 +64,37 @@ export default {
       this.dataList = res.data;
       this.gloLoading = false;
       this.prevCityId = cityId; // 记录上一个cityId
-      this.prevCityNm = cityNm;  
+      this.prevCityNm = cityNm;
     });
   },
   methods: {
-    handleToDetail() {},
+    handleToDetail(id) {
+      this.$router.push("/movie/detail/1/" + id);
+    },
     handleToScroll(pos) {
       if (pos.y > 30) {
         this.loading = true;
+        this.$refs.loadWrapper.style.height = "71.2px";
+      } else if (pos.y < -70) {
+        // 上拉 ..
       }
     },
     handleToTouchEnd(pos) {
       if (pos.y > 30) {
-        this.$http.get("/movieApi/in_theaters?city=" + this.prevCityNm).then(res => {
-          this.dataList = res.data;
-          this.loading = false;
-        });
+        this.$http
+          .get("/movieApi/in_theaters?city=" + this.prevCityNm)
+          .then(res => {
+            this.dataList = res.data;
+            this.loading = false;
+            this.$refs.loadWrapper.style.height = "0";
+          });
+      } else if (pos.y < -70) {
+        // 上拉
       }
     }
   },
   components: {
-    movieList,
-   
+    movieList
   }
 };
 </script>
