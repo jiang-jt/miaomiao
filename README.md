@@ -14,44 +14,27 @@ npm run serve
 
 ## 关于接口数据
 此项目所用的接口为豆瓣电影接口，偶尔数据返回速度慢：
-* 获取正在热映的电影：https://douban.uieee.com/v2/movie/in_theaters
-访问参数：
-start : 数据的开始项
+* 获取正在热映的电影：https://douban.uieee.com/v2/movie/in_theaters 访问参数：
+    * start : 数据的开始项
+    * count：单页条数
+    * city：城市
  
-count：单页条数
+* 获取电影Top250：https://douban.uieee.com/v2/movie/top250访问参数：
+    * start : 数据的开始项
+    * count：单页条数
  
-city：城市
+* 获取即将上映电影：https://douban.uieee.com/v2/movie/coming_soon 访问参数：
+    * start : 数据的开始项
+    * count：单页条数
  
-* 获取电影Top250：https://douban.uieee.com/v2/movie/top250
-访问参数：
-start : 数据的开始项
- 
-count：单页条数
- 
-* 获取即将上映电影：https://douban.uieee.com/v2/movie/coming_soon
-访问参数：
-start : 数据的开始项
- 
-count：单页条数
- 
- 
-* 电影搜索：https://douban.uieee.com/v2/movie/search**电影搜索无法使用了**
-访问参数：
-start : 数据的开始项
- 
-count：单页条数
- 
-q：要搜索的电影关键字
- 
-tag：要搜索的电影的标签
- 
-* 电影详情：https://douban.uieee.com/v2/movie/subject/:id
-访问参数：电影id
+* 电影详情：https://douban.uieee.com/v2/movie/subject/:id 访问参数：
+    * 电影id
 如：电影《小飞象》的电影id为：25924056，搜索此电影的详细信息：
 https://api.douban.com/v2/movie/subject/25924056
  
  ## 效果演示
- <a href="http://203.195.250.110">查看demo请戳这里</a>（请用Chrome手机模式预览）
+ <a href="http://203.195.250.110" target="_blank">查看demo请戳这里</a>（请用Chrome手机模式预览）
+ **注意:**如果在请求数据时报错，未能显示页面，请刷新重试。
 
  ## 所遇到问题
  1. 使用axios请求接口时遇到跨域问题
@@ -66,4 +49,6 @@ https://api.douban.com/v2/movie/subject/25924056
  * 将需要fixed定位的元素放在transform之外就解决了。
  5. 详情页中，在使用swiper对剧照实现左右滑动功能时失效。
  * 原因是在数据变化之前已经初始化了，使用this.$nextTick在回调函数中初始化swiper解决。
- 
+
+## 总结
+问题遇得多了，才能收获更多。
