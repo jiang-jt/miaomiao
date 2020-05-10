@@ -4,6 +4,7 @@
 vue-cli3 + vuex + vue-router + webpack +axios + ES6 + sass +flex + better-scroll + element-ui
 
 ## 项目运行
+```shell
 git clone https://github.com/jiang-jt/miaomiao.git
 
 cd miaomiao
@@ -11,7 +12,7 @@ cd miaomiao
 npm install 
 
 npm run serve
-
+```
 ## 关于接口数据
 此项目所用的接口为豆瓣电影接口，偶尔数据返回速度慢：
 * 获取正在热映的电影：https://douban.uieee.com/v2/movie/in_theaters 访问参数：
@@ -38,17 +39,17 @@ https://api.douban.com/v2/movie/subject/25924056
 
  ## 所遇到问题
  1. 使用axios请求接口时遇到跨域问题
- * 手动创建vue.config.js配置文件。
- * 在配置文件中设置proxy，vue-cli2中是配置proxyTable。
+  * 手动创建vue.config.js配置文件。
+  * 在配置文件中设置proxy，vue-cli2中是配置proxyTable。
  2. 在电影搜索时使用watch侦听input的数据，数据发生变化时发送异步请求，这造成异步请求过多。
- * 使用axios的cancelToken进行函数防抖。
+  * 使用axios的cancelToken进行函数防抖。
  3. 使用axios请求时，异步请求的结果还没回来，就已经开始渲染页面了，此时页面上绑定的数据为空，导致报错。
- * 使用loading，在发送请求时，展示loading组件，当数据返回后，展示数据页面。
+  * 使用loading，在发送请求时，展示loading组件，当数据返回后，展示数据页面。
  4. 电影详情页中，因为使用了better-scroll,导致内部元素使用fixed定位失效。
- * 原因是div中有transform属性导致position:fixed失效了。
- * 将需要fixed定位的元素放在transform之外就解决了。
+  * 原因是div中有transform属性导致position:fixed失效了。
+  * 将需要fixed定位的元素放在transform之外就解决了。
  5. 详情页中，在使用swiper对剧照实现左右滑动功能时失效。
- * 原因是在数据变化之前已经初始化了，使用this.$nextTick在回调函数中初始化swiper解决。
+  * 原因是在数据变化之前已经初始化了，使用this.$nextTick在回调函数中初始化swiper解决。
 
 ## 总结
 问题遇得多了，才能收获更多。
